@@ -1,9 +1,11 @@
 module EquationSolver.Lexer where
 
   import Data.Char  
+  import EquationSolver.Flow
   import Control.Monad.Identity
   import Control.Monad.Error
   import Control.Monad.State
+  import Control.Monad.Writer
 
   -- Represents our tokens
   data Operation = LexPlus | LexMinus | LexMult | LexDiv | LexPow deriving (Eq)
@@ -26,11 +28,8 @@ module EquationSolver.Lexer where
     show (LexRParen) = ")"
     show LexEquals = "="
 
-  -- Tokenize of a is wraps the error message (String) over the Identity monad
-  type Tokenize a = ErrorT String Identity a
-
   -- simple tokenizer that breaks our stream into digits, operators, variables, parens and equals
-  tokenize :: String -> Tokenize [Token]
+  tokenize :: String -> Flow [Token]
   tokenize expr@(x:xs) 
     | isDigit x    = do
       let (digits, rest) = span isDigit expr -- consume this and all other digits
@@ -46,7 +45,7 @@ module EquationSolver.Lexer where
     | otherwise    = syntaxError x
   tokenize []      = return []
 
-  (<:>) :: Token -> Tokenize [Token] -> Tokenize [Token]
+  (<:>) :: Token -> Flow [Token] -> Flow [Token]
   (<:>) token tokenizeRest = tokenizeRest >>= \rest -> return $ token : rest
 
   -- constructs operator from x
@@ -61,7 +60,7 @@ module EquationSolver.Lexer where
   paren '(' = LexLParen 
 
   -- prepares syntax error
-  syntaxError :: (Show a) => a -> Tokenize b
+  syntaxError :: (Show a) => a -> Flow b
   syntaxError x = throwError $ "Bad syntax near " ++ (show x)
 
   -- simple character matchers
@@ -74,4 +73,4 @@ module EquationSolver.Lexer where
   -- "x^2 + 4*x + 17 = 0"
   -- "5*(x*x + x) + 6*x - 17 = 15*x"
   runTokenize :: String -> Either String [Token]
-  runTokenize x = runIdentity (runErrorT $ tokenize x)
+  runTokenize x = fst $ runIdentity $ runWriterT $ runErrorT $ tokenize x

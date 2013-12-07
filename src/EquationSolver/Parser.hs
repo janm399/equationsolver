@@ -1,12 +1,11 @@
 module EquationSolver.Parser where
 
+  import EquationSolver.Flow
   import EquationSolver.Lexer
   import Control.Monad.Writer
   import Control.Monad.Error
   import Control.Monad.Identity
 
-  type Parse a = ErrorT String (WriterT [String] Identity) a
-  --type Parse a = ErrorT String Identity a
   data Equation = Equation Expr Expr deriving (Show, Eq)
   data Expr = Pow Expr Expr
             | Mult Expr Expr | Div Expr Expr
@@ -19,21 +18,12 @@ module EquationSolver.Parser where
   -- x^2+x+2 ~> Plus (Pow (V x) (C 2)) (V x) (C 2)
   
   {--
-    expr = factor * expr
-         | factor / expr
-         | factor
-
-    factor = term + factor
-           | term - factor
-           | term
-
-    term = number 
-         | variable 
-         | ( expr )
+    expr = factor * expr | factor / expr | factor
+    factor = term + factor | term - factor | term
+    term = number | variable | ( expr )
   --}
 
-
-  parse :: [Token] -> Parse Equation
+  parse :: [Token] -> Flow Equation
   parse tokens =
     case break (== LexEquals) tokens of
       (l, [])  -> do
@@ -46,37 +36,47 @@ module EquationSolver.Parser where
         re <- parseExpr r
         return $ Equation (fst le) (fst re)
 
-  parseExpr :: [Token] -> Parse (Expr, [Token])
+  -- expr = factor * expr | factor / expr | factor
+  parseExpr :: [Token] -> Flow (Expr, [Token])
   parseExpr tkns = do
     (factor, restTkns) <- parseFactor tkns
-    tell ["factor: " ++ (show factor)]
+    tell ["factor: " ++ (show factor) ++ ", rest: " ++ (show restTkns)]
     case restTkns of
       (LexOp LexMult):restExpr -> parseExpr restExpr >>= \expr -> return (Mult factor (fst expr), (snd expr))
       x                        -> return (factor, x)
 
     where
-      parseFactor :: [Token] -> Parse (Expr, [Token])
+      -- factor = term + factor | term - factor | term
+      parseFactor :: [Token] -> Flow (Expr, [Token])
       parseFactor tkns = do
         (term, restTkns) <- parseTerm tkns
+        tell ["term: " ++ (show term) ++ ", rest: " ++ (show restTkns)]
         case restTkns of
-          (LexOp LexPlus):restFactor -> parseTerm restFactor >>= \expr -> return (Plus term (fst expr), (snd expr))
+          (LexOp LexPlus):restFactor -> parseFactor restFactor >>= \expr -> return (Plus term (fst expr), (snd expr))
           x                          -> return (term, x)
 
-      parseTerm :: [Token] -> Parse (Expr, [Token])
+      -- term = number | variable | ( expr )
+      parseTerm :: [Token] -> Flow (Expr, [Token])
       parseTerm tkns = do
         case tkns of
           (LexConstant c):restTkns -> return ((Constant c), restTkns)
           (LexVar x):restTkns      -> return ((Variable x), restTkns)
-          (LexLParen):restTkns     -> parseExpr (init restTkns) >>= \expr -> return (fst expr, snd expr)
-          _                        -> throwError $ "Unexpected " ++ (show tkns)
+          (LexLParen):restTkns     -> remaining restTkns
+        where
+          remaining :: [Token] -> Flow (Expr, [Token])
+          remaining tkns = do
+              (expr, rest) <- parseExpr tkns
+              case rest of
+                LexRParen:rest' -> return (expr, rest')
+                a:_             -> throwError "Unbalanced parens"
+                []              -> throwError "Missing )"
 
   -- Convenience function for "eyeball debugging". Parses for example expressions
   -- runParse $ tokenize "x^2 + 4*x + 17 = 0"
   -- runParse $ tokenize "5*x*x + x + 6*x - 17 = 15*x"
-  runParse' :: Tokenize [Token] -> Either String (Equation, [String])
-  runParse' tokenize = 
-    runIdentity (runErrorT (runWriterT ("" tokenize >>= parse)))
+  runParse' :: Flow [Token] -> (Either String Equation, [String])
+  runParse' tokenize = runIdentity $ runWriterT $ runErrorT $ tokenize >>= parse
 
-  runParse :: Tokenize [Token] -> Either String Equation
-  runParse tokenize = runIdentity (runErrorT $ tokenize >>= parse)
+  runParse :: Flow [Token] -> Either String Equation
+  runParse tokenize = fst $ runIdentity $ runWriterT $ runErrorT $ tokenize >>= parse
 
