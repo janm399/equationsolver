@@ -1,0 +1,38 @@
+name:                equationsolver
+version:             0.1.0.0
+-- synopsis:            
+-- description:         
+license:             Apache-2.0
+license-file:        LICENSE
+author:              Jan Machacek
+maintainer:          jan.machacek@gmail.com
+-- copyright:           
+category:            Language
+build-type:          Simple
+cabal-version:       >=1.8
+
+library
+  -- main-is:
+  -- other-modules:       
+  exposed-modules:
+      EquationSolver.Lexer
+    , EquationSolver.Parser
+  hs-source-dirs:
+      src
+  build-depends:       
+      base ==4.*
+    , mtl >= 2.1.2
+
+test-suite spec
+  type:
+      exitcode-stdio-1.0
+  ghc-options:
+      -Wall -Werror
+  hs-source-dirs:
+      test
+  main-is:
+      Spec.hs
+  build-depends:
+      equationsolver
+    , base    == 4.*
+    , hspec   >= 1.3
