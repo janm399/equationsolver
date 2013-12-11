@@ -1,7 +1,7 @@
 module EquationSolver.Lexer where
 
   import Data.Char  
-  import EquationSolver.Flow
+  import EquationSolver.Common
   import Control.Monad.Identity
   import Control.Monad.Error
   import Control.Monad.State
@@ -9,7 +9,7 @@ module EquationSolver.Lexer where
 
   -- Represents our tokens
   data Operation = LexPlus | LexMinus | LexMult | LexDiv | LexPow deriving (Eq)
-  data Token = LexVar Char | LexConstant Int | LexOp Operation | LexLParen | LexRParen | LexEquals  deriving (Eq)
+  data Token = LexVar Char | LexConstant Integer | LexOp Operation | LexLParen | LexRParen | LexEquals  deriving (Eq)
 
   -- Show instances to make the tokens look nice
   instance Show Operation where
@@ -33,7 +33,7 @@ module EquationSolver.Lexer where
   tokenize expr@(x:xs) 
     | isDigit x    = do
       let (digits, rest) = span isDigit expr -- consume this and all other digits
-      LexConstant (read digits :: Int) <:> tokenize rest
+      LexConstant (read digits :: Integer) <:> tokenize rest
     | isAlpha x    = do
       case span isAlpha expr of -- consume this and all other letters
         (var:[], rest) -> LexVar var <:> tokenize rest

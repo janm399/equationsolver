@@ -16,12 +16,26 @@ library
   -- other-modules:       
   exposed-modules:
       EquationSolver.Lexer
+    , EquationSolver.Common
+    , EquationSolver.Attoparsec
     , EquationSolver.Parser
   hs-source-dirs:
       src
   build-depends:       
-      base ==4.*
+      base == 4.*
+    , bytestring >= 0.10
+    , attoparsec >= 0.10.4
+    , attoparsec-expr >= 0.1
     , mtl >= 2.1.2
+
+executable equationsolver-main
+  main-is: Main.hs
+  hs-source-dirs: main
+  build-depends:
+      equationsolver
+    , base == 4.*
+    , bytestring >= 0.10
+    , amqp >= 0.7.0
 
 test-suite spec
   type:

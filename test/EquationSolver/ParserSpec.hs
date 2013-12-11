@@ -3,6 +3,7 @@ module EquationSolver.ParserSpec (spec) where
   import Test.Hspec
   import EquationSolver.Lexer
   import EquationSolver.Parser
+  import EquationSolver.Common
 
   spec :: Spec
   spec = do

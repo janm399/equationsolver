@@ -1,18 +1,10 @@
 module EquationSolver.Parser where
 
-  import EquationSolver.Flow
+  import EquationSolver.Common
   import EquationSolver.Lexer
   import Control.Monad.Writer
   import Control.Monad.Error
   import Control.Monad.Identity
-
-  data Equation = Equation Expr Expr deriving (Show, Eq)
-  data Expr = Pow Expr Expr
-            | Mult Expr Expr | Div Expr Expr
-            | Plus Expr Expr | Minus Expr Expr
-            | Variable Char
-            | Constant Int deriving (Show, Eq)
-
   -- 1+2*3   ~> Plus (Mult (C 2) (C 3)) (C 1)
   -- 1*x+2*3 ~> Plus (Mult (C1) (V x)) (Mult (C 2) (C 3))
   -- x^2+x+2 ~> Plus (Pow (V x) (C 2)) (V x) (C 2)
