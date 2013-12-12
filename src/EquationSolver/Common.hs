@@ -7,7 +7,7 @@ module EquationSolver.Common where
   -- Tokenize of a is wraps the error message (String) over the Identity monad
   type Flow = ErrorT String (WriterT [String] Identity)
   data Equation = Equation Expr Expr deriving (Show, Eq)
-  data Expr = Pow Expr Expr
+  data Expr = Pow Expr Expr | Sqrt Expr
             | Mult Expr Expr | Div Expr Expr
             | Plus Expr Expr | Minus Expr Expr
             | Variable Char

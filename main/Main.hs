@@ -1,7 +1,6 @@
 {-# OPTIONS -XOverloadedStrings #-}
 module Main where
-  import EquationSolver.Lexer
-  import EquationSolver.Parser
+  import EquationSolver.AttoparsecParser
   import Network.AMQP
   import qualified Data.ByteString.Lazy.Char8 as BL
 
@@ -20,6 +19,6 @@ module Main where
     where
       solve :: (Message, Envelope) -> IO ()
       solve (msg, env) = do
-        let x = runParse $ tokenize (BL.unpack $ msgBody msg)
+        let x = runParseEquation (BL.unpack $ msgBody msg)
         putStrLn $ show x
         ackEnv env

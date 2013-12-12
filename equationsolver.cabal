@@ -15,14 +15,14 @@ library
   -- main-is:
   -- other-modules:       
   exposed-modules:
-      EquationSolver.Lexer
-    , EquationSolver.Common
-    , EquationSolver.Attoparsec
-    , EquationSolver.Parser
+      EquationSolver.Common
+    , EquationSolver.AttoparsecParser
+    , EquationSolver.ManualParser
   hs-source-dirs:
       src
   build-depends:       
       base == 4.*
+    , word8 >= 0.0.4
     , bytestring >= 0.10
     , attoparsec >= 0.10.4
     , attoparsec-expr >= 0.1
