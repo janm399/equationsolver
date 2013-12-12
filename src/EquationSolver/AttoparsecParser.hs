@@ -43,7 +43,7 @@ module EquationSolver.AttoparsecParser(parseEquation, runParseEquation) where
           <?> "simple expression"
 
   number :: Parser Expr
-  number = AC.decimal >>= return . Constant
+  number = (AC.signed AC.decimal) >>= return . Constant
           <?> "number"
 
   variable :: Parser Expr
