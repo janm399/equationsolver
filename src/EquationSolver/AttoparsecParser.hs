@@ -72,7 +72,7 @@ module EquationSolver.AttoparsecParser(parseEquation, runParseEquation) where
 
   -- |Parser that matches signed decimal numbers
   number :: Parser Expr
-  number = (AC.signed AC.decimal) >>= return . Constant
+  number = (AC.signed AC.double) >>= return . Constant
           <?> "number"
 
   -- |Parser that matches single alphas

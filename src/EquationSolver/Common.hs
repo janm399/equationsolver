@@ -17,5 +17,5 @@ module EquationSolver.Common where
             | Mult Expr Expr | Div Expr Expr
             | Plus Expr Expr | Minus Expr Expr
             | Variable Char
-            | Constant Integer deriving (Show, Eq)
+            | Constant Double deriving (Show, Eq)
 

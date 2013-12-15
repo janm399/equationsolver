@@ -24,7 +24,7 @@ module EquationSolver.ManualParser(parseEquation, runParseEquation) where
 
   -- Represents our tokens
   data Operation = LexPlus | LexMinus | LexMult | LexDiv | LexPow deriving (Eq)
-  data Token = LexVar Char | LexConstant Integer | LexOp Operation | LexLParen | LexRParen | LexEquals  deriving (Eq)
+  data Token = LexVar Char | LexConstant Double | LexOp Operation | LexLParen | LexRParen | LexEquals  deriving (Eq)
 
   -- Show instances to make the tokens look nice
   instance Show Operation where
@@ -48,7 +48,7 @@ module EquationSolver.ManualParser(parseEquation, runParseEquation) where
   tokenize expr@(x:xs) 
     | isDigit x    = do
       let (digits, rest) = span isDigit expr -- consume this and all other digits
-      LexConstant (read digits :: Integer) <:> tokenize rest
+      LexConstant (read digits :: Double) <:> tokenize rest
     | isAlpha x    = do
       case span isAlpha expr of -- consume this and all other letters
         (var:[], rest) -> LexVar var <:> tokenize rest
